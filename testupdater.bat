@@ -52,6 +52,7 @@ if %errorlevel%==1 (
 :MENU
 cls
 echo =====================================
+echo test jaja
 echo        🧰 MENU MULTITOOL v1.0
 echo =====================================
 echo.
