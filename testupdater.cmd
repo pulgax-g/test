@@ -1,0 +1,94 @@
+@echo off
+title Multitool Auto-Actualizable
+setlocal enabledelayedexpansion
+
+:: ====================================================
+:: CONFIGURACIÓN - PON AQUÍ TU URL RAW DE GITHUB
+:: ====================================================
+set "URL=https://raw.githubusercontent.com/pulgax-g/test/refs/heads/main/testupdater.cmd"
+set "TMP=%TEMP%\__update_tmp.bat"
+set "NEW=%TEMP%\__update_new.bat"
+set "REPL=%TEMP%\__replace_and_restart.cmd"
+set "ME=%~f0"
+
+:: ====================================================
+:: AUTOACTUALIZACIÓN
+:: ====================================================
+echo [🔄] Comprobando actualizaciones en GitHub...
+
+powershell -NoProfile -Command ^
+ "try { Invoke-WebRequest -Uri '%URL%' -OutFile '%TMP%' -UseBasicParsing -ErrorAction Stop } catch { exit 2 }"
+
+if errorlevel 2 (
+    echo [⚠️] No se pudo conectar con GitHub. Continuando sin actualizar.
+    goto :MENU
+)
+
+powershell -NoProfile -Command ^
+ "$h1=(Get-FileHash -Algorithm SHA256 -Path '%ME%').Hash; $h2=(Get-FileHash -Algorithm SHA256 -Path '%TMP%').Hash; if($h1 -ne $h2){ exit 1 } else { exit 0 }"
+
+if %errorlevel%==1 (
+    echo [⬆️] Nueva version encontrada. Actualizando...
+
+    copy /Y "%TMP%" "%NEW%" >nul
+
+    (
+        echo @echo off
+        echo ping -n 2 127.0.0.1 ^>nul
+        echo move /Y "%NEW%" "%ME%" ^>nul
+        echo start "" "%ME%"
+        echo del "%%~f0" ^>nul
+    ) > "%REPL%"
+
+    start "" "%REPL%"
+    exit /B
+) else (
+    echo [✅] Ya tienes la ultima version.
+)
+
+:: ====================================================
+:: MENÚ MULTITOOL
+:: ====================================================
+:MENU
+cls
+echo =====================================
+echo        🧰 MENU MULTITOOL v1.0
+echo =====================================
+echo.
+echo [1] Mostrar información del sistema
+echo [2] Abrir el Bloc de notas
+echo [3] Limpiar temporales de Windows
+echo [4] Actualizar manualmente ahora
+echo [0] Salir
+echo.
+set /p opcion="Selecciona una opcion: "
+
+if "%opcion%"=="1" goto SYSINFO
+if "%opcion%"=="2" goto NOTEPAD
+if "%opcion%"=="3" goto LIMPIAR
+if "%opcion%"=="4" goto ACTUALIZAR
+if "%opcion%"=="0" exit /B
+goto MENU
+
+:SYSINFO
+cls
+echo [ℹ️] INFORMACIÓN DEL SISTEMA
+systeminfo | more
+pause
+goto MENU
+
+:NOTEPAD
+start notepad
+goto MENU
+
+:LIMPIAR
+echo [🧹] Limpiando archivos temporales...
+del /s /q "%TEMP%\*.*" >nul 2>nul
+echo Limpieza completada.
+pause
+goto MENU
+
+:ACTUALIZAR
+echo Forzando actualizacion...
+del "%TMP%" 2>nul
+goto :EOF
