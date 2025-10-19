@@ -5,7 +5,7 @@ setlocal enabledelayedexpansion
 :: ====================================================
 :: CONFIGURACIÓN - PON AQUÍ TU URL RAW DE GITHUB
 :: ====================================================
-set "URL=https://raw.githubusercontent.com/pulgax-g/test/refs/heads/main/testupdater"
+set "URL=https://raw.githubusercontent.com/pulgax-g/test/refs/heads/main/testupdater.bat"
 set "TMP=%TEMP%\__update_tmp.bat"
 set "NEW=%TEMP%\__update_new.bat"
 set "REPL=%TEMP%\__replace_and_restart.cmd"
